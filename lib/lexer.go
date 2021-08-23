@@ -1,10 +1,10 @@
 package lexer
 
 import (
-	"fmt"
+	"errors"
 )
 
-const jsonQuote = '/'
+const jsonQuote = '"'
 
 type jsonString string
 
@@ -13,8 +13,8 @@ func Lex(input string) ([]interface{}, error) {
 	var tokens []interface{}
 
 	for len(str) > 0 {
-		jsonStrings, ret, err := lexString(str)
-		str = ret;
+		jsonStrings, s, err := lexString(str)
+		str = s;
 		if err != nil {
 			return nil, err
 		}
@@ -22,6 +22,8 @@ func Lex(input string) ([]interface{}, error) {
 			tokens = append(tokens, jsonStrings)
 			continue
 		}
+
+		return nil, errors.New("unexpected character " + string(str))
 	}
 
 	return tokens, nil
@@ -37,11 +39,11 @@ func lexString(str []rune) (jsonString, []rune, error) {
 	var strings []rune
 	for i, char := range str {
 		if char == jsonQuote {
-			str = str[i:]
+			str = str[i+1:]
 			return jsonString(strings), str, nil
 		}
 		strings = append(strings, char)
 	}
 
-	return "", str, fmt.Errorf("Expected end-of-string quote")
+	return "", str, errors.New("expected end-of-string quote")
 }
