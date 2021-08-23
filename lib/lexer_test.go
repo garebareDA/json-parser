@@ -30,3 +30,12 @@ func TestJsonBoolFalse(t *testing.T) {
 	}
 	assert.Equal(t, jsonBool(false), tokens[0])
 }
+
+func TestJsonNull(t *testing.T) {
+	tokens, err := Lex("null")
+	if err != nil {
+		t.Fatalf("null error: %v", err)
+	}
+
+	assert.Equal(t, nil, tokens[0])
+}

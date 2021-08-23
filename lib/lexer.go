@@ -39,6 +39,12 @@ func Lex(input string) ([]interface{}, error) {
 			continue
 		}
 
+		jsonNull := lex.lexNull()
+		if jsonNull {
+			lex.tokens = append(lex.tokens, nil)
+			continue
+		}
+
 		return nil, errors.New("unexpected character " + string(lex.input[0]))
 	}
 
@@ -68,16 +74,26 @@ func (l *lexer) lexBool() (jsonBool, bool) {
 	trueLen := len("true")
 	falseLen := len("false")
 
-	if string(l.input[0:trueLen]) == "true" {
+	if len(l.input) >= trueLen && string(l.input[0:trueLen]) == "true" {
 		l.input = l.input[trueLen:]
-		log.Println(l.input)
 		return jsonBool(true), true
 	}
 
-	if string(l.input[0:falseLen]) == "false" {
+	if len(l.input) >= falseLen && string(l.input[0:falseLen]) == "false" {
 		l.input = l.input[falseLen:]
 		return jsonBool(false), true
 	}
 
 	return false, false
+}
+
+func (l *lexer) lexNull() bool {
+	nullLen := len("null")
+	log.Println(nullLen)
+	if string(l.input[0:nullLen]) == "null" {
+		l.input = l.input[nullLen:]
+		return true
+	}
+
+	return false
 }
