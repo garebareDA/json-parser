@@ -3,8 +3,8 @@ package lexer
 import (
 	"errors"
 	"strconv"
+	"fmt"
 )
-
 
 type lexer struct {
 	input  []rune
@@ -50,7 +50,15 @@ func Lex(input string) ([]interface{}, error) {
 			continue
 		}
 
-		return nil, errors.New("unexpected character " + string(lex.input[0]))
+		jsonSyntax, err := lex.lexSyntax()
+		if err != nil {
+			return nil, err
+		}
+		if jsonSyntax != ' ' {
+			lex.tokens = append(lex.tokens, jsonSyntax)
+		}
+
+		return nil, fmt.Errorf("unexpected character %s", string(lex.input[0]))
 	}
 
 	return lex.tokens, nil
@@ -102,7 +110,7 @@ func (l *lexer) lexNull() bool {
 	return false
 }
 
-func (l *lexer) lexNumber()(interface{}, error) {
+func (l *lexer) lexNumber() (interface{}, error) {
 	jsonNumbers := []rune{}
 	isFloat := false
 	for _, chr := range l.input {
@@ -123,7 +131,7 @@ func (l *lexer) lexNumber()(interface{}, error) {
 
 	if isFloat {
 		f, err := strconv.ParseFloat(string(jsonNumbers), 32)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 		return jsonFloat(f), nil
@@ -134,4 +142,21 @@ func (l *lexer) lexNumber()(interface{}, error) {
 		return nil, err
 	}
 	return jsonInt(i), nil
+}
+
+func (l *lexer) lexSyntax() (jsonSyntax, error) {
+	chr := l.input[0]
+	_, ok := jsonWhiteSpace[chr]
+	if ok {
+		l.input = l.input[1:]
+		return jsonSyntax(' '), nil
+	}
+
+	_, ok = jsonSyntaxs[chr]
+	if ok {
+		l.input = l.input[1:]
+		return jsonSyntax(chr), nil
+	}
+
+	return jsonSyntax(' '), fmt.Errorf("unexpected character %s", string(chr))
 }
