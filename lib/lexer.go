@@ -2,21 +2,17 @@ package lexer
 
 import (
 	"errors"
-	"log"
+	"strconv"
 )
 
-const jsonQuote = '"'
-
-type jsonString string
-type jsonBool bool
 
 type lexer struct {
-	input []rune
+	input  []rune
 	tokens []interface{}
 }
 
-func newLexer(input string) lexer {
-	return lexer {
+func newLexer(input string) *lexer {
+	return &lexer{
 		input: []rune(input),
 	}
 }
@@ -45,13 +41,22 @@ func Lex(input string) ([]interface{}, error) {
 			continue
 		}
 
+		jsonNumber, err := lex.lexNumber()
+		if err != nil {
+			return nil, err
+		}
+		if jsonNumber != nil {
+			lex.tokens = append(lex.tokens, jsonNumber)
+			continue
+		}
+
 		return nil, errors.New("unexpected character " + string(lex.input[0]))
 	}
 
 	return lex.tokens, nil
 }
 
-func (l *lexer) lexString () (jsonString, error) {
+func (l *lexer) lexString() (jsonString, error) {
 	if jsonQuote == l.input[0] {
 		l.input = l.input[1:]
 	} else {
@@ -62,7 +67,7 @@ func (l *lexer) lexString () (jsonString, error) {
 	for i, char := range l.input {
 		if char == jsonQuote {
 			l.input = l.input[i+1:]
-			return jsonString(strings),  nil
+			return jsonString(strings), nil
 		}
 		strings = append(strings, char)
 	}
@@ -89,11 +94,44 @@ func (l *lexer) lexBool() (jsonBool, bool) {
 
 func (l *lexer) lexNull() bool {
 	nullLen := len("null")
-	log.Println(nullLen)
 	if string(l.input[0:nullLen]) == "null" {
 		l.input = l.input[nullLen:]
 		return true
 	}
 
 	return false
+}
+
+func (l *lexer) lexNumber()(interface{}, error) {
+	jsonNumbers := []rune{}
+	isFloat := false
+	for _, chr := range l.input {
+		_, ok := numbers[chr]
+		if ok {
+			isFloat = chr == 'e' || chr == '.' || chr == 'E' || isFloat
+			jsonNumbers = append(jsonNumbers, chr)
+		} else {
+			break
+		}
+	}
+
+	l.input = l.input[len(jsonNumbers):]
+
+	if len(jsonNumbers) < 1 {
+		return nil, nil
+	}
+
+	if isFloat {
+		f, err := strconv.ParseFloat(string(jsonNumbers), 32)
+		if err != nil{
+			return nil, err
+		}
+		return jsonFloat(f), nil
+	}
+
+	i, err := strconv.ParseInt(string(jsonNumbers), 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	return jsonInt(i), nil
 }

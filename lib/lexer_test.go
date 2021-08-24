@@ -39,3 +39,19 @@ func TestJsonNull(t *testing.T) {
 
 	assert.Equal(t, nil, tokens[0])
 }
+
+func TestJsonNumber(t *testing.T) {
+	tokens, err := Lex("12345")
+	if err != nil {
+		t.Fatalf("numberFloat error: %v", err)
+	}
+	assert.Equal(t, tokens[0], jsonInt(12345))
+}
+
+func TestJsonFloat(t *testing.T) {
+	token, err := Lex("123.45")
+	if err != nil {
+		t.Fatalf("numbersInt error : %v", err)
+	}
+	assert.Equal(t, token[0], jsonFloat(123.45))
+}
