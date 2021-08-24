@@ -56,9 +56,8 @@ func Lex(input string) ([]interface{}, error) {
 		}
 		if jsonSyntax != ' ' {
 			lex.tokens = append(lex.tokens, jsonSyntax)
+			continue
 		}
-
-		return nil, fmt.Errorf("unexpected character %s", string(lex.input[0]))
 	}
 
 	return lex.tokens, nil
@@ -102,7 +101,7 @@ func (l *lexer) lexBool() (jsonBool, bool) {
 
 func (l *lexer) lexNull() bool {
 	nullLen := len("null")
-	if string(l.input[0:nullLen]) == "null" {
+	if len(l.input) >= nullLen && string(l.input[0:nullLen]) == "null" {
 		l.input = l.input[nullLen:]
 		return true
 	}

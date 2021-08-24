@@ -55,3 +55,18 @@ func TestJsonFloat(t *testing.T) {
 	}
 	assert.Equal(t, token[0], jsonFloat(123.45))
 }
+
+func TestJsonSyntax(t *testing.T) {
+	token, err := Lex("{} [1, 1.23, ]")
+	if err != nil {
+		t.Fatalf("syntax error : %v", err)
+	}
+	assert.Equal(t, token[0], jsonSyntax('{'))
+	assert.Equal(t, token[1], jsonSyntax('}'))
+	assert.Equal(t, token[2], jsonSyntax('['))
+	assert.Equal(t, token[3], jsonInt(1))
+	assert.Equal(t, token[4], jsonSyntax(','))
+	assert.Equal(t, token[5], jsonFloat(1.23))
+	assert.Equal(t, token[6], jsonSyntax(','))
+	assert.Equal(t, token[7], jsonSyntax(']'))
+}
