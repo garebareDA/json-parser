@@ -5,8 +5,8 @@ import(
 	"github.com/garebareDA/json-parser/lib/lexer"
 )
 
-func Parse(input string) error {
-	tokens, err := lexer.Lex(input)
+func FromString(str string) error {
+	tokens, err := lexer.Lex(str)
 	if err != nil {
 		return err
 	}
@@ -16,4 +16,8 @@ func Parse(input string) error {
 	}
 
 	return nil
+}
+
+func parse() {
+	
 }
