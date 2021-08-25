@@ -63,7 +63,7 @@ func Lex(input string) ([]interface{}, error) {
 	return lex.tokens, nil
 }
 
-func (l *lexer) lexString() (jsonString, error) {
+func (l *lexer) lexString() (JsonString, error) {
 	if jsonQuote == l.input[0] {
 		l.input = l.input[1:]
 	} else {
@@ -74,7 +74,7 @@ func (l *lexer) lexString() (jsonString, error) {
 	for i, char := range l.input {
 		if char == jsonQuote {
 			l.input = l.input[i+1:]
-			return jsonString(strings), nil
+			return JsonString(strings), nil
 		}
 		strings = append(strings, char)
 	}
@@ -82,18 +82,18 @@ func (l *lexer) lexString() (jsonString, error) {
 	return "", errors.New("expected end-of-string quote")
 }
 
-func (l *lexer) lexBool() (jsonBool, bool) {
+func (l *lexer) lexBool() (JsonBool, bool) {
 	trueLen := len("true")
 	falseLen := len("false")
 
 	if len(l.input) >= trueLen && string(l.input[0:trueLen]) == "true" {
 		l.input = l.input[trueLen:]
-		return jsonBool(true), true
+		return JsonBool(true), true
 	}
 
 	if len(l.input) >= falseLen && string(l.input[0:falseLen]) == "false" {
 		l.input = l.input[falseLen:]
-		return jsonBool(false), true
+		return JsonBool(false), true
 	}
 
 	return false, false
@@ -133,29 +133,29 @@ func (l *lexer) lexNumber() (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		return jsonFloat(f), nil
+		return JsonFloat(f), nil
 	}
 
 	i, err := strconv.ParseInt(string(jsonNumbers), 10, 32)
 	if err != nil {
 		return nil, err
 	}
-	return jsonInt(i), nil
+	return JsonInt(i), nil
 }
 
-func (l *lexer) lexSyntax() (jsonSyntax, error) {
+func (l *lexer) lexSyntax() (JsonSyntax, error) {
 	chr := l.input[0]
 	_, ok := jsonWhiteSpace[chr]
 	if ok {
 		l.input = l.input[1:]
-		return jsonSyntax(' '), nil
+		return JsonSyntax(' '), nil
 	}
 
 	_, ok = jsonSyntaxs[chr]
 	if ok {
 		l.input = l.input[1:]
-		return jsonSyntax(chr), nil
+		return JsonSyntax(chr), nil
 	}
 
-	return jsonSyntax(' '), fmt.Errorf("unexpected character %s", string(chr))
+	return JsonSyntax(' '), fmt.Errorf("unexpected character %s", string(chr))
 }
