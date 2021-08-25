@@ -64,7 +64,7 @@ func Lex(input string) ([]interface{}, error) {
 }
 
 func (l *lexer) lexString() (JsonString, error) {
-	if jsonQuote == l.input[0] {
+	if JsonQuote == l.input[0] {
 		l.input = l.input[1:]
 	} else {
 		return "", nil
@@ -72,7 +72,7 @@ func (l *lexer) lexString() (JsonString, error) {
 
 	var strings []rune
 	for i, char := range l.input {
-		if char == jsonQuote {
+		if char == JsonQuote {
 			l.input = l.input[i+1:]
 			return JsonString(strings), nil
 		}

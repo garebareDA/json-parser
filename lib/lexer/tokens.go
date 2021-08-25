@@ -1,13 +1,13 @@
 package lexer
 
 const (
-	jsonQuote        = '"'
-	jsonComma        = ','
-	jsonColon        = ':'
-	jsonLeftBracket  = '['
-	jsonRightBracket = ']'
-	jsonLeftBrace    = '{'
-	jsonRightBrace   = '}'
+	JsonQuote        = '"'
+	JsonComma        = ','
+	JsonColon        = ':'
+	JsonLeftBracket  = '['
+	JsonRightBracket = ']'
+	JsonLeftBrace    = '{'
+	JsonRightBrace   = '}'
 )
 
 var jsonWhiteSpace = map[rune]struct{}{
@@ -19,12 +19,12 @@ var jsonWhiteSpace = map[rune]struct{}{
 }
 
 var jsonSyntaxs = map[rune]struct{}{
-	jsonColon:        {},
-	jsonComma:        {},
-	jsonLeftBrace:    {},
-	jsonRightBrace:   {},
-	jsonLeftBracket:  {},
-	jsonRightBracket: {},
+	JsonColon:        {},
+	JsonComma:        {},
+	JsonLeftBrace:    {},
+	JsonRightBrace:   {},
+	JsonLeftBracket:  {},
+	JsonRightBracket: {},
 }
 
 type JsonString string
