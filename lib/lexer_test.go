@@ -70,3 +70,25 @@ func TestJsonSyntax(t *testing.T) {
 	assert.Equal(t, token[6], jsonSyntax(','))
 	assert.Equal(t, token[7], jsonSyntax(']'))
 }
+
+func TestJsonAll(t *testing.T) {
+	token, err := Lex(`{"name":"a", "number": 123, "obj":{} }`)
+	if err != nil {
+		t.Fatalf("syntax all error : %v", err)
+	}
+
+	assert.Equal(t, token[0], jsonSyntax('{'))
+	assert.Equal(t, token[1], jsonString("name"))
+	assert.Equal(t, token[2], jsonSyntax(':'))
+	assert.Equal(t, token[3], jsonString("a"))
+	assert.Equal(t, token[4], jsonSyntax(','))
+	assert.Equal(t, token[5], jsonString("number"))
+	assert.Equal(t, token[6], jsonSyntax(':'))
+	assert.Equal(t, token[7], jsonInt(123))
+	assert.Equal(t, token[8], jsonSyntax(','))
+	assert.Equal(t, token[9], jsonString("obj"))
+	assert.Equal(t, token[10], jsonSyntax(':'))
+	assert.Equal(t, token[11], jsonSyntax('{'))
+	assert.Equal(t, token[12], jsonSyntax('}'))
+	assert.Equal(t, token[13], jsonSyntax('}'))
+}
