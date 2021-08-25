@@ -27,11 +27,11 @@ var jsonSyntaxs = map[rune]struct{}{
 	jsonRightBracket: {},
 }
 
-type jsonString string
-type jsonBool bool
-type jsonInt int32
-type jsonFloat float32
-type jsonSyntax rune
+type JsonString string
+type JsonBool bool
+type JsonInt int32
+type JsonFloat float32
+type JsonSyntax rune
 
 var numbers map[rune]struct{} = createNumbers()
 func createNumbers() map[rune]struct{} {
