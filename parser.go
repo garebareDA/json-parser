@@ -16,7 +16,7 @@ func newParser(token []interface{}) parser {
 	}
 }
 
-func FromString(str string) ([]interface{}, error) {
+func FromString(str string) ([]map[string]interface{}, error) {
 	tokens, err := lexer.Lex(str)
 	if err != nil {
 		return nil, err
@@ -31,8 +31,8 @@ func FromString(str string) ([]interface{}, error) {
 	return json, nil
 }
 
-func (p *parser) parseJson() ([]interface{}, error) {
-	var jsonObj []interface{}
+func (p *parser) parseJson() ([]map[string]interface{}, error) {
+	var jsonObj []map[string]interface{}
 	for len(p.token) > 0 {
 		json, err := p.objectParse()
 		if err != nil {
