@@ -63,7 +63,7 @@ func Lex(input string) ([]interface{}, error) {
 	return lex.tokens, nil
 }
 
-func (l *lexer) lexString() (JsonString, error) {
+func (l *lexer) lexString() (string, error) {
 	if JsonQuote == l.input[0] {
 		l.input = l.input[1:]
 	} else {
@@ -74,7 +74,7 @@ func (l *lexer) lexString() (JsonString, error) {
 	for i, char := range l.input {
 		if char == JsonQuote {
 			l.input = l.input[i+1:]
-			return JsonString(strings), nil
+			return string(strings), nil
 		}
 		strings = append(strings, char)
 	}
@@ -82,18 +82,18 @@ func (l *lexer) lexString() (JsonString, error) {
 	return "", errors.New("expected end-of-string quote")
 }
 
-func (l *lexer) lexBool() (JsonBool, bool) {
+func (l *lexer) lexBool() (bool, bool) {
 	trueLen := len("true")
 	falseLen := len("false")
 
 	if len(l.input) >= trueLen && string(l.input[0:trueLen]) == "true" {
 		l.input = l.input[trueLen:]
-		return JsonBool(true), true
+		return true, true
 	}
 
 	if len(l.input) >= falseLen && string(l.input[0:falseLen]) == "false" {
 		l.input = l.input[falseLen:]
-		return JsonBool(false), true
+		return false, true
 	}
 
 	return false, false
@@ -133,14 +133,14 @@ func (l *lexer) lexNumber() (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		return JsonFloat(f), nil
+		return float32(f), nil
 	}
 
 	i, err := strconv.ParseInt(string(jsonNumbers), 10, 32)
 	if err != nil {
 		return nil, err
 	}
-	return JsonInt(i), nil
+	return int32(i), nil
 }
 
 func (l *lexer) lexSyntax() (JsonSyntax, error) {
@@ -148,7 +148,7 @@ func (l *lexer) lexSyntax() (JsonSyntax, error) {
 	_, ok := jsonWhiteSpace[chr]
 	if ok {
 		l.input = l.input[1:]
-		return JsonSyntax(' '), nil
+		return ' ', nil
 	}
 
 	_, ok = jsonSyntaxs[chr]
@@ -157,5 +157,5 @@ func (l *lexer) lexSyntax() (JsonSyntax, error) {
 		return JsonSyntax(chr), nil
 	}
 
-	return JsonSyntax(' '), fmt.Errorf("unexpected character %s", string(chr))
+	return ' ', fmt.Errorf("unexpected character %s", string(chr))
 }

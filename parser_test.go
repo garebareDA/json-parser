@@ -12,6 +12,5 @@ func TestParser(t *testing.T) {
 	if err != nil {
 		t.Fatalf("perse error: %s", err)
 	}
-
 	fmt.Println(json...)
 }

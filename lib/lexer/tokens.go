@@ -1,5 +1,7 @@
 package lexer
 
+type JsonSyntax rune
+
 const (
 	JsonQuote        = '"'
 	JsonComma        = ','
@@ -26,12 +28,6 @@ var jsonSyntaxs = map[rune]struct{}{
 	JsonLeftBracket:  {},
 	JsonRightBracket: {},
 }
-
-type JsonString string
-type JsonBool bool
-type JsonInt int32
-type JsonFloat float32
-type JsonSyntax rune
 
 var numbers map[rune]struct{} = createNumbers()
 func createNumbers() map[rune]struct{} {
