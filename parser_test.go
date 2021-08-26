@@ -8,9 +8,9 @@ import (
 )
 
 func TestParser(t *testing.T) {
-	json, err := parser.FromString(`{"name":}`)
+	json, err := parser.FromString(`{"name" : 23}`)
 	if err != nil {
-		t.Fail()
+		t.Fatalf("perse error: %s", err)
 	}
 
 	fmt.Println(json...)

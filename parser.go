@@ -35,7 +35,7 @@ func FromString(str string) ([]interface{}, error) {
 func (p *parser) parseJson() error {
 	for len(p.token) > 0 {
 		if p.token[0] != lexer.JsonSyntax(lexer.JsonLeftBrace) {
-			return fmt.Errorf("syntax error : %v", p.token[0])
+			return fmt.Errorf("syntax error right brace: %s", p.token[0:])
 		}
 
 		json, err := p.objectParse()
@@ -50,7 +50,7 @@ func (p *parser) parseJson() error {
 func (p *parser) objectParse() (map[string]interface{}, error) {
 	jsonObject := make(map[string]interface{})
 	if p.token[0] != lexer.JsonSyntax(lexer.JsonLeftBrace) {
-		return nil, fmt.Errorf("syntax error : %v", p.token[0])
+		return nil, fmt.Errorf("syntax error right brace: %s", p.token[0:])
 	}
 
 	for {
@@ -59,12 +59,48 @@ func (p *parser) objectParse() (map[string]interface{}, error) {
 		if ok {
 			p.token = p.token[1:]
 			if p.token[0] != lexer.JsonSyntax(lexer.JsonColon) {
-				return nil, fmt.Errorf("syntax error : %v", p.token[0])
+				return nil, fmt.Errorf("syntax error colon : %s", p.token[0:])
 			}
 
 			p.token = p.token[1:]
-			//Valueを入れる
-			fmt.Println(s)
+			t := p.token[0]
+
+			if t == nil {
+				jsonObject[string(s)] = nil
+				p.token = p.token[1:]
+			}
+
+			if b, ok := t.(lexer.JsonBool); ok {
+				jsonObject[(string(s))] = bool(b)
+				p.token = p.token[1:]
+			}
+
+			if f, ok := t.(lexer.JsonFloat); ok {
+				jsonObject[string(s)] = float32(f)
+				p.token = p.token[1:]
+			}
+
+			if i, ok := t.(lexer.JsonInt); ok {
+				jsonObject[string(s)] = int32(i)
+				p.token = p.token[1:]
+			}
+
+			if ss, ok := t.(lexer.JsonString); ok {
+				jsonObject[string(s)] = string(ss)
+				p.token = p.token[1:]
+			}
+
+			if syn, ok := t.(lexer.JsonSyntax); ok && syn == lexer.JsonLeftBrace {
+				obj, err := p.objectParse()
+				if err != nil {
+					return nil, err
+				}
+				jsonObject[string(s)] = obj
+			}
+
+			if array, ok := t.(lexer.JsonSyntax); ok && array == lexer.JsonLeftBracket {
+				//配列
+			}
 
 			if p.token[0] == lexer.JsonSyntax(lexer.JsonComma) {
 				continue
@@ -76,6 +112,6 @@ func (p *parser) objectParse() (map[string]interface{}, error) {
 			return jsonObject, nil
 		}
 
-		return nil, fmt.Errorf("syntax error : %v", p.token[0])
+		return nil, fmt.Errorf("syntax error left brace : %s", p.token[0])
 	}
 }
