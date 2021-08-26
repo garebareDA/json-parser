@@ -2,12 +2,12 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/garebareDA/json-parser/lib/lexer"
 )
 
 type parser struct {
 	token []interface{}
-	json  []interface{}
 }
 
 func newParser(token []interface{}) parser {
@@ -23,23 +23,24 @@ func FromString(str string) ([]interface{}, error) {
 	}
 
 	parser := newParser(tokens)
-	err = parser.parseJson()
+	json, err := parser.parseJson()
 	if err != nil {
 		return nil, err
 	}
 
-	return parser.json, nil
+	return json, nil
 }
 
-func (p *parser) parseJson() error {
+func (p *parser) parseJson() ([]interface{}, error) {
+	var jsonObj []interface{}
 	for len(p.token) > 0 {
 		json, err := p.objectParse()
 		if err != nil {
-			return err
+			return nil, err
 		}
-		p.json = append(p.json, json)
+		jsonObj = append(jsonObj, json)
 	}
-	return nil
+	return jsonObj, nil
 }
 
 func (p *parser) objectParse() (map[string]interface{}, error) {
