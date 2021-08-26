@@ -33,10 +33,6 @@ func FromString(str string) ([]interface{}, error) {
 
 func (p *parser) parseJson() error {
 	for len(p.token) > 0 {
-		if p.token[0] != lexer.JsonSyntax(lexer.JsonLeftBrace) {
-			return fmt.Errorf("syntax error left brace: %s", p.token[0:])
-		}
-
 		json, err := p.objectParse()
 		if err != nil {
 			return err
@@ -51,9 +47,9 @@ func (p *parser) objectParse() (map[string]interface{}, error) {
 	if p.token[0] != lexer.JsonSyntax(lexer.JsonLeftBrace) {
 		return nil, fmt.Errorf("syntax error left brace: %s", p.token[0:])
 	}
+	p.token = p.token[1:]
 
 	for {
-		p.token = p.token[1:]
 		s, ok := p.token[0].(string)
 		if ok {
 			p.token = p.token[1:]
@@ -63,26 +59,14 @@ func (p *parser) objectParse() (map[string]interface{}, error) {
 
 			p.token = p.token[1:]
 			t := p.token[0]
-			js, ok := t.(lexer.JsonSyntax)
-
-			if js == lexer.JsonLeftBrace {
-				obj, err := p.objectParse()
-				if err != nil {
-					return nil, err
-				}
-				jsonObject[s] = obj
+			value, err := p.valueParser(t)
+			if err != nil {
+				return nil, err
 			}
 
-			if js == lexer.JsonLeftBracket {
-				
-			}
-
-			if !ok {
-				jsonObject[s] = t
+			jsonObject[s] = value
+			if p.token[0] == lexer.JsonSyntax(lexer.JsonComma) {
 				p.token = p.token[1:]
-			}
-
-			if p.token[0] == lexer.JsonComma {
 				continue
 			}
 		}
@@ -94,4 +78,63 @@ func (p *parser) objectParse() (map[string]interface{}, error) {
 
 		return nil, fmt.Errorf("syntax error right brace : %s", p.token[0])
 	}
+}
+
+func (p *parser) arrayParser() ([]interface{}, error) {
+	var jsonArray []interface{}
+	if p.token[0] != lexer.JsonSyntax(lexer.JsonLeftBracket) {
+		return nil, fmt.Errorf("syntax error left bracket: %s", p.token[0:])
+	}
+
+	for {
+		p.token = p.token[1:]
+		t := p.token[0]
+		value, err := p.valueParser(t)
+		if err != nil {
+			return nil, err
+		}
+
+		jsonArray = append(jsonArray, value)
+		if p.token[0] == lexer.JsonSyntax(lexer.JsonComma) {
+			continue
+		}
+
+		if p.token[0] == lexer.JsonSyntax(lexer.JsonRightBracket) {
+			return jsonArray, nil
+		}
+
+		return nil, fmt.Errorf("syntax error right bracket: %s", p.token[0:])
+	}
+}
+
+func (p *parser) valueParser(t interface{}) (interface{}, error) {
+	js, ok := t.(lexer.JsonSyntax)
+	if js == lexer.JsonLeftBrace {
+		obj, err := p.objectParse()
+		if err != nil {
+			return nil, err
+		}
+		return obj, nil
+	}
+
+	if js == lexer.JsonLeftBracket {
+		array, err := p.arrayParser()
+		if err != nil {
+			return nil, err
+		}
+		p.token = p.token[1:]
+		return array, nil
+	}
+
+	if !ok {
+		p.token = p.token[1:]
+		return t, nil
+	}
+
+	if t == nil {
+		p.token = p.token[1:]
+		return nil, nil
+	}
+
+	return nil, fmt.Errorf("syntax error invald vlue: %s", p.token[0:])
 }
